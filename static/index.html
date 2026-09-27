@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#edf3ee">
+<title>Atelier de lettres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #20332e;
+    --muted: #73807a;
+    --line: #dce5dd;
+    --paper: #fffefa;
+    --canvas: #edf3ee;
+    --forest: #245c4a;
+    --forest-dark: #194638;
+    --coral: #d56b50;
+    --gold: #f0c66b;
+    --soft-green: #e7f0e9;
+    --shadow: 0 18px 55px rgba(29, 57, 46, .08);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 82% 0%, rgba(240, 198, 107, .19), transparent 29rem),
+      linear-gradient(135deg, #eff4ef 0%, #e8f0eb 52%, #f5f2e9 100%);
+    font-family: "DM Sans", "Segoe UI", sans-serif;
+  }
+
+  button, textarea { font: inherit; }
+  button { -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+
+  .topbar {
+    display: flex;
+    min-height: 74px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(20px, 5vw, 72px);
+    border-bottom: 1px solid rgba(32, 51, 46, .09);
+  }
+  .brand { display: flex; align-items: center; gap: 11px; }
+  .brand-mark {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 11px;
+    color: #fffefa;
+    background: var(--forest);
+  }
+  .brand-name { font-size: 14px; font-weight: 700; letter-spacing: .02em; }
+  .brand-name span { color: var(--coral); }
+  .local-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid rgba(36, 92, 74, .14);
+    border-radius: 999px;
+    color: #476459;
+    background: rgba(255, 254, 250, .62);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .local-dot { width: 7px; height: 7px; border-radius: 50%; background: #57a479; }
+
+  .app-shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 51px 0 64px; }
+  .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 27px; }
+  .eyebrow { margin: 0 0 9px; color: var(--coral); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+  h1, h2, p { margin-top: 0; }
+  h1 { margin-bottom: 0; font-family: Newsreader, Georgia, serif; font-size: clamp(34px, 4vw, 48px); font-weight: 500; line-height: 1.05; }
+  .heading-note { margin: 0 0 3px; color: var(--muted); font-size: 13px; }
+
+  .workspace { display: grid; grid-template-columns: minmax(270px, 350px) minmax(0, 1fr); gap: 19px; align-items: start; }
+  .panel {
+    overflow: hidden;
+    border: 1px solid rgba(32, 51, 46, .1);
+    border-radius: 8px;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+  .source-panel { padding: 22px; }
+  .panel-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .step-number {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--forest);
+    background: var(--soft-green);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .panel-heading h2 { margin: 0; font-size: 15px; font-weight: 700; }
+  .dropzone {
+    display: flex;
+    min-height: 192px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: 1px dashed #a8b9ad;
+    border-radius: 7px;
+    color: var(--ink);
+    background: #f5f8f4;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+  }
+  .dropzone:hover, .dropzone.hover, .dropzone:focus-visible { border-color: var(--forest); background: #eaf3ec; outline: none; }
+  .dropzone.hover { transform: scale(1.01); }
+  .upload-mark {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 13px;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--forest);
+    background: #e5efe7;
+  }
+  .drop-title { margin: 0 0 5px; font-size: 14px; font-weight: 700; }
+  .drop-caption { margin: 0; color: var(--muted); font-size: 12px; }
+  .file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+  .preview-wrap { margin-top: 14px; }
+  #preview { display: block; width: 100%; max-height: 280px; border-radius: 6px; background: #eef1ec; object-fit: contain; }
+  .file-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+  #fileName { overflow: hidden; color: var(--ink); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+
+  .button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 15px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: white;
+    background: var(--forest);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .button:hover:not(:disabled) { transform: translateY(-1px); background: var(--forest-dark); box-shadow: 0 5px 14px rgba(25, 70, 56, .18); }
+  .button:focus-visible, .icon-button:focus-visible { outline: 3px solid rgba(213, 107, 80, .4); outline-offset: 2px; }
+  .button:disabled { opacity: .48; cursor: not-allowed; }
+  .button-wide { width: 100%; margin-top: 17px; }
+  .button-coral { background: var(--coral); }
+  .button-coral:hover:not(:disabled) { background: #bd573e; }
+  .button svg, .icon-button svg { width: 17px; height: 17px; }
+  .privacy-note { display: flex; align-items: center; gap: 7px; margin: 13px 0 0; color: var(--muted); font-size: 11px; }
+
+  .editor-column { display: grid; gap: 19px; }
+  .editor-panel, .letter-panel { padding: 22px 24px 24px; }
+  .editor-top, .letter-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .field-label { display: flex; align-items: center; gap: 10px; }
+  .field-label h2 { margin: 0; font-size: 15px; font-weight: 700; }
+  .field-tag { padding: 5px 8px; border-radius: 4px; color: #7a6431; background: #fbf2dc; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  #transcriptionText {
+    display: block;
+    width: 100%;
+    min-height: 204px;
+    margin-top: 17px;
+    padding: 15px 16px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink);
+    background: #fcfcf8;
+    font-size: 14px;
+    line-height: 1.7;
+    resize: vertical;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  #transcriptionText:focus { border-color: #729584; outline: none; box-shadow: 0 0 0 3px rgba(36, 92, 74, .1); }
+  #transcriptionText:disabled { color: #87928b; background: #f5f6f1; }
+  .editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 13px; }
+  .editor-hint { margin: 0; color: var(--muted); font-size: 11px; }
+  #formalize { flex: 0 0 auto; }
+  #formelText {
+    min-height: 155px;
+    margin: 16px 0 0;
+    padding: 16px;
+    border-left: 3px solid var(--gold);
+    border-radius: 0 5px 5px 0;
+    color: #35433d;
+    background: #f7f7f0;
+    font-family: Newsreader, Georgia, serif;
+    font-size: 17px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+  .icon-button {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--forest);
+    background: #fffefa;
+    cursor: pointer;
+  }
+  .icon-button:hover:not(:disabled) { background: var(--soft-green); }
+  .icon-button:disabled { opacity: .4; cursor: not-allowed; }
+  .letter-actions { display: flex; align-items: center; gap: 8px; }
+  .pdf-button { display: flex; width: auto; padding: 0 10px; gap: 7px; font-size: 12px; }
+
+  #status { min-height: 20px; margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  #status[data-state="success"] { color: var(--forest); }
+  #status[data-state="error"] { color: #b54536; }
+  #status[data-state="loading"] { color: #8a6725; }
+
+  .enter { animation: enter .55s both; }
+  .editor-column { animation-delay: .08s; }
+  @keyframes enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+  @media (max-width: 760px) {
+    .topbar { min-height: 64px; padding-inline: 20px; }
+    .app-shell { width: min(100% - 28px, 560px); padding-top: 34px; }
+    .page-heading { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .workspace { grid-template-columns: 1fr; gap: 14px; }
+    .source-panel, .editor-panel, .letter-panel { padding: 18px; }
+    .dropzone { min-height: 150px; }
+  }
+  @media (max-width: 460px) {
+    .local-badge { padding: 7px 9px; font-size: 11px; }
+    .brand-name { font-size: 13px; }
+    .editor-footer { align-items: stretch; flex-direction: column; }
+    #formalize { width: 100%; }
+    .editor-hint { order: 1; }
+  }
+  @media print {
+    @page { margin: 22mm 20mm; }
+    body { min-width: 0; min-height: 0; color: #222; background: #fff; }
+    .topbar, .page-heading, .source-panel, .editor-panel, #status, .letter-actions { display: none !important; }
+    .app-shell { width: auto; margin: 0; padding: 0; }
+    .workspace, .editor-column { display: block; }
+    .letter-panel { overflow: visible; padding: 0; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
+    .letter-top { margin-bottom: 24px; }
+    .letter-top .step-number { display: none; }
+    .letter-top h2 { font-family: Georgia, serif; font-size: 15pt; }
+    #formelText { min-height: 0; margin: 0; padding: 0; border: 0; color: #222; background: #fff; font-family: Georgia, "Times New Roman", serif; font-size: 12pt; line-height: 1.65; white-space: pre-wrap; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="Atelier de lettres">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M5 3.75h9l5 5v11.5H5z"/><path d="M14 3.75v5h5M8.5 13h7M8.5 16.5h7"/></svg>
+      </span>
+      <span class="brand-name">LETTRE<span>.</span></span>
+    </div>
+    <div class="local-badge"><span class="local-dot"></span>Modèle local · Ollama</div>
+  </header>
+
+  <main class="app-shell">
+    <div class="page-heading enter">
+      <div>
+        <p class="eyebrow">Espace de rédaction</p>
+        <h1>Atelier de lettres</h1>
+      </div>
+      <p class="heading-note">Un document, une version prête à envoyer.</p>
+    </div>
+
+    <div class="workspace">
+      <aside class="panel source-panel enter" aria-labelledby="sourceHeading">
+        <div class="panel-heading">
+          <span class="step-number">01</span>
+          <h2 id="sourceHeading">Document source</h2>
+        </div>
+        <div id="drop" class="dropzone" role="button" tabindex="0" aria-label="Choisir une image de lettre">
+          <span class="upload-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="23" height="23"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14v5h14v-5"/></svg>
+          </span>
+          <p class="drop-title">Déposer une image</p>
+          <p class="drop-caption">ou parcourir · PNG, JPEG, WebP</p>
+        </div>
+        <input type="file" id="file" class="file-input" accept="image/png,image/jpeg,image/webp">
+        <div class="preview-wrap">
+          <img id="preview" alt="Aperçu du document" hidden>
+          <div id="fileMeta" class="file-meta" hidden>
+            <span id="fileName"></span>
+            <span id="fileSize"></span>
+          </div>
+        </div>
+        <button id="transcribe" class="button button-wide" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8M8 8h8M8 12h5M5 3h14v18H5z"/><path d="m14 16 2 2 4-4"/></svg>
+          Transcrire l’image
+        </button>
+        <p class="privacy-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          Traitement local sur votre machine
+        </p>
+      </aside>
+
+      <div class="editor-column enter">
+        <section class="panel editor-panel" aria-labelledby="transcriptionHeading">
+          <div class="editor-top">
+            <div class="field-label">
+              <span class="step-number">02</span>
+              <h2 id="transcriptionHeading">Transcription</h2>
+            </div>
+            <span class="field-tag">À vérifier</span>
+          </div>
+          <textarea id="transcriptionText" aria-label="Transcription modifiable" placeholder="Le texte reconnu apparaîtra ici." disabled></textarea>
+          <div class="editor-footer">
+            <p class="editor-hint">Le texte peut être corrigé avant la reformulation.</p>
+            <button id="formalize" class="button button-coral" disabled>
+              Générer la lettre
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel letter-panel" aria-labelledby="letterHeading">
+          <div class="letter-top">
+            <div class="field-label">
+              <span class="step-number">03</span>
+              <h2 id="letterHeading">Lettre formelle</h2>
+            </div>
+            <div class="letter-actions">
+              <button id="exportPdf" class="button button-coral pdf-button" type="button" title="Exporter la lettre en PDF" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg>
+                Exporter PDF
+              </button>
+              <button id="copyFormal" class="icon-button" type="button" title="Copier la lettre" aria-label="Copier la lettre" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>
+              </button>
+            </div>
+          </div>
+          <pre id="formelText">La version rédigée apparaîtra ici.</pre>
+        </section>
+
+        <p id="status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </main>
+
+<script>
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+const preview = document.getElementById('preview');
+const fileMeta = document.getElementById('fileMeta');
+const transcribeBtn = document.getElementById('transcribe');
+const formalizeBtn = document.getElementById('formalize');
+const transcriptionText = document.getElementById('transcriptionText');
+const formelText = document.getElementById('formelText');
+const copyBtn = document.getElementById('copyFormal');
+const exportPdfBtn = document.getElementById('exportPdf');
+const statusEl = document.getElementById('status');
+let selectedFile = null;
+let previewUrl = null;
+
+function setStatus(message, state = '') {
+  statusEl.textContent = message;
+  statusEl.dataset.state = state;
+}
+
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('keydown', event => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    fileInput.click();
+  }
+});
+drop.addEventListener('dragover', event => { event.preventDefault(); drop.classList.add('hover'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('hover'));
+drop.addEventListener('drop', event => {
+  event.preventDefault();
+  drop.classList.remove('hover');
+  handleFile(event.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', event => handleFile(event.target.files[0]));
+
+function handleFile(file) {
+  if (!file) return;
+  selectedFile = file;
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = URL.createObjectURL(file);
+  preview.src = previewUrl;
+  preview.hidden = false;
+  fileMeta.hidden = false;
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = file.size < 1024 * 1024
+    ? `${Math.max(1, Math.round(file.size / 1024))} Ko`
+    : `${(file.size / (1024 * 1024)).toFixed(1)} Mo`;
+  transcribeBtn.disabled = false;
+  formalizeBtn.disabled = true;
+  transcriptionText.disabled = true;
+  transcriptionText.value = '';
+  formelText.textContent = 'La version rédigée apparaîtra ici.';
+  copyBtn.disabled = true;
+  exportPdfBtn.disabled = true;
+  setStatus('Image prête à être transcrite.');
+}
+
+transcribeBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  transcribeBtn.disabled = true;
+  formalizeBtn.disabled = true;
+  transcriptionText.disabled = true;
+  setStatus('Lecture de l’écriture en cours…', 'loading');
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    const res = await fetch('/api/transcrire', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Erreur inconnue');
+
+    transcriptionText.value = data.transcription;
+    transcriptionText.disabled = false;
+    formalizeBtn.disabled = !transcriptionText.value.trim();
+    setStatus('Transcription terminée.', 'success');
+  } catch (err) {
+    setStatus(`Erreur : ${err.message}`, 'error');
+  } finally {
+    transcribeBtn.disabled = false;
+  }
+});
+
+transcriptionText.addEventListener('input', () => {
+  formalizeBtn.disabled = !transcriptionText.value.trim();
+});
+
+formalizeBtn.addEventListener('click', async () => {
+  const transcription = transcriptionText.value.trim();
+  if (!transcription) return;
+
+  formalizeBtn.disabled = true;
+  transcribeBtn.disabled = true;
+  setStatus('Rédaction de la lettre formelle en cours…', 'loading');
+
+  try {
+    const res = await fetch('/api/formaliser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcription }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Erreur inconnue');
+
+    formelText.textContent = data.lettre_formelle;
+    copyBtn.disabled = false;
+    exportPdfBtn.disabled = false;
+    setStatus('Lettre formelle prête à copier.', 'success');
+  } catch (err) {
+    setStatus(`Erreur : ${err.message}`, 'error');
+  } finally {
+    formalizeBtn.disabled = !transcriptionText.value.trim();
+    transcribeBtn.disabled = !selectedFile;
+  }
+});
+
+exportPdfBtn.addEventListener('click', () => {
+  if (exportPdfBtn.disabled || !formelText.textContent.trim()) return;
+  window.print();
+});
+
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(formelText.textContent);
+    setStatus('Lettre copiée dans le presse-papiers.', 'success');
+  } catch {
+    setStatus('Copie impossible depuis ce navigateur.', 'error');
+  }
+});
+</script>
+</body>
+</html>

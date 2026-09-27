@@ -1,0 +1,1 @@
+"""Application de transcription et de formalisation de lettres."""
